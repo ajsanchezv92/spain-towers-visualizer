@@ -1,0 +1,71 @@
+# CONFIGURACIÓN DE DESPLIEGUE PARA NETLIFY
+# 
+# Este archivo configura el build y deploy automático en Netlify
+# Netlify detecta automáticamente este archivo
+
+[build]
+  # COMANDO PARA CONSTRUIR LA APLICACIÓN
+  # Ejecuta el script de build definido en package.json
+  command = "npm run build"
+  
+  # CARPETA DE SALIDA DEL BUILD
+  # Vite genera los archivos estáticos en la carpeta 'dist'
+  publish = "dist"
+
+[build.environment]
+  # VERSIÓN DE NODE.JS
+  # Usa una versión LTS (Long Term Support) para estabilidad
+  NODE_VERSION = "18"
+
+# CONFIGURACIÓN DE ENCABEZADOS DE SEGURIDAD
+[[headers]]
+  # A QUÉ RUTAS APLICAN ESTOS ENCABEZADOS
+  for = "/*"
+  
+  [headers.values]
+    # POLÍTICA DE SEGURIDAD DE CONTENIDO (CSP)
+    # Restringe qué recursos puede cargar la aplicación
+    Content-Security-Policy = '''
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' https://unpkg.com;
+      style-src 'self' 'unsafe-inline' https://unpkg.com;
+      img-src 'self' data: https:;
+      connect-src 'self' https://*.railway.app https://*.render.com;
+      font-src 'self';
+      base-uri 'self';
+      form-action 'self';
+      frame-ancestors 'none';
+    '''
+    
+    # PROTECCIÓN XSS EN NAVEGADORES ANTIGUOS
+    X-XSS-Protection = "1; mode=block"
+    
+    # PREVENIR SNIFFING DE MIME TYPE
+    X-Content-Type-Options = "nosniff"
+    
+    # POLÍTICA DE REFERRER
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # PERMISOS DE CARACTERÍSTICAS DEL NAVEGADOR
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
+    
+    # FORZAR HTTPS
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# REDIRECCIONES PARA SINGLE PAGE APPLICATION (SPA)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# CONFIGURACIÓN ADICIONAL PARA RENDIMIENTO
+[context.production.environment]
+  # VARIABLES DE ENTORNO ESPECÍFICAS DE PRODUCCIÓN
+  NODE_ENV = "production"
+
+# CONFIGURACIÓN PARA RAMA DE DESARROLLO (OPCIONAL)
+[context.deploy-preview.environment]
+  NODE_ENV = "development"
+
+[context.branch-deploy.environment]
+  NODE_ENV = "development"
