@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spain Mobile Towers Dashboard</title>
+    <meta name="description" content="Mapa interactivo de antenas móviles en España - Dashboard optimizado">
+    
+    <!-- PRELOAD CRÍTICO: Conexiones y recursos esenciales -->
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="preconnect" href="https://your-api.railway.app">
+    
+    <!-- HOJA DE ESTILOS DE LEAFLET - CDN para mejor carga -->
+    <link 
+        rel="stylesheet" 
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""
+    />
+    
+    <!-- CSS CRÍTICO INLINE: Evita FOUC (Flash of Unstyled Content) -->
+    <style>
+        /* RESET BÁSICO Y ESTILOS CRÍTICOS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f6fa;
+            overflow: hidden; /* Evita scroll no deseado */
+        }
+        
+        #root {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        /* ESTADO DE CARGA INICIAL */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 18px;
+            color: #2c3e50;
+            background: white;
+        }
+        
+        .loading::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #3498db;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- CONTENEDOR PRINCIPAL DE REACT -->
+    <div id="root">
+        <div class="loading">Cargando dashboard de antenas...</div>
+    </div>
+    
+    <!-- SCRIPT PRINCIPAL - type="module" para ES6 modules -->
+    <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- SCRIPT DE LEAFLET - Cargado después del DOM -->
+    <script 
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+    ></script>
+</body>
+</html>
