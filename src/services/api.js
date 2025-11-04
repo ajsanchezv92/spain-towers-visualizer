@@ -6,6 +6,14 @@
  */
 
 /**
+ * CONFIGURACIÓN DE LA API - URL FIJA TEMPORAL
+ * 
+ * URL de tu API desplegada en Render
+ * Cambiar posteriormente por variable de entorno VITE_API_URL
+ */
+const API_BASE = 'https://spain-mobile-towers-api.onrender.com'
+
+/**
  * SISTEMA DE CACHE EN MEMORIA
  * 
  * Almacena respuestas para evitar peticiones duplicadas
@@ -24,24 +32,32 @@ const CACHE_DURATION = 5 * 60 * 1000
 /**
  * FUNCIÓN PRINCIPAL PARA CARGAR DATOS DEL MAPA
  * 
- * @param {string} url - URL completa del endpoint
+ * @param {string} url - URL completa o relativa del endpoint
  * @returns {Promise<any>} - Datos parseados de la API
  * @throws {Error} - Si hay error de red o servidor
  */
 export async function loadMapData(url) {
+  /**
+   * CONSTRUIR URL COMPLETA
+   * 
+   * Si la URL es relativa (empieza con /), añadir la base de la API
+   * Si ya es una URL completa, usarla directamente
+   */
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`
+  
   /**
    * VERIFICAR CACHE PRIMERO
    * 
    * Si tenemos una respuesta cacheada y aún es válida,
    * la devolvemos inmediatamente sin hacer petición
    */
-  const cached = CACHE.get(url)
+  const cached = CACHE.get(fullUrl)
   if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-    console.log('📦 [CACHE HIT]', url)
+    console.log('📦 [CACHE HIT]', fullUrl)
     return cached.data
   }
 
-  console.log('🌐 [API CALL]', url)
+  console.log('🌐 [API CALL]', fullUrl)
 
   try {
     /**
@@ -52,7 +68,7 @@ export async function loadMapData(url) {
      * - Solo acepta JSON
      * - AbortSignal para cancelación
      */
-    const response = await fetch(url, {
+    const response = await fetch(fullUrl, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -84,12 +100,12 @@ export async function loadMapData(url) {
      * Almacena tanto los datos como el timestamp
      * para controlar la expiración
      */
-    CACHE.set(url, {
+    CACHE.set(fullUrl, {
       data,
       timestamp: Date.now()
     })
     
-    console.log('✅ [API SUCCESS]', url, `(${getDataSize(data)} bytes)`)
+    console.log('✅ [API SUCCESS]', fullUrl, `(${getDataSize(data)} bytes)`)
     return data
 
   } catch (error) {
@@ -99,16 +115,18 @@ export async function loadMapData(url) {
      * Distingue entre diferentes tipos de errores
      * para mejor debugging
      */
-    console.error('❌ [API ERROR]', url, error)
+    console.error('❌ [API ERROR]', fullUrl, error)
     
     if (error.name === 'TimeoutError') {
-      throw new Error('El servidor tardó demasiado en responder')
+      throw new Error('La API tardó demasiado en responder. Render puede estar iniciándose.')
     } else if (error.name === 'AbortError') {
       throw new Error('La petición fue cancelada')
     } else if (error.message.includes('HTTP')) {
       throw new Error(`Error del servidor: ${error.message}`)
+    } else if (error.message.includes('Failed to fetch')) {
+      throw new Error('No se puede conectar con la API. Verifica que Render esté activo.')
     } else {
-      throw new Error('Error de conexión. Verifica tu internet.')
+      throw new Error('Error de conexión con la API de antenas.')
     }
   }
 }
@@ -148,3 +166,11 @@ setInterval(() => {
     console.log(`🧹 [CACHE CLEANED] ${cleanedCount} expired entries`)
   }
 }, 60000) // Ejecutar cada minuto
+
+/**
+ * EXPORTAR URL BASE PARA USO EN OTROS COMPONENTES
+ * 
+ * Permite que otros componentes conozcan la URL base
+ * sin necesidad de importar toda la lógica de API
+ */
+export { API_BASE }
