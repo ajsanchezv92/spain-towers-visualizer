@@ -30,7 +30,7 @@
       script-src 'self' 'unsafe-inline' https://unpkg.com;
       style-src 'self' 'unsafe-inline' https://unpkg.com;
       img-src 'self' data: https:;
-      connect-src 'self' https://*.railway.app https://*.render.com;
+      connect-src 'self' https://*.railway.app https://*.render.com https://spain-mobile-towers-api.onrender.com;
       font-src 'self';
       base-uri 'self';
       form-action 'self';
